@@ -1,0 +1,59 @@
+DCELL — PROJETO PARA VERCEL + FREEIMAGE.HOST
+===========================================
+
+O projeto contém:
+- Página responsiva com visual azul escuro, brilho e cartão de upload.
+- Prévia da foto escolhida, validação, barra de progresso, copiar link e enviar outra.
+- API de servidor em /api/upload que mantém a chave do Freeimage.host fora do navegador.
+
+IMPORTANTE SOBRE A FOTO DE FUNDO
+--------------------------------
+Coloque a sua imagem azul que você já usava no projeto neste caminho:
+public/images/fundo.jpg
+O CSS já está preparado para usá-la. Se não colocar esse arquivo, o site ainda abre com o fundo azul e os efeitos.
+
+COMO CONSEGUIR A CHAVE
+----------------------
+1. Entre em https://freeimage.host/pt-br/api
+2. Localize a área "Chave da API" e siga o procedimento do serviço para obter sua chave.
+3. Não publique nem envie a chave para ninguém.
+
+COMO PUBLICAR NA VERCEL
+-----------------------
+1. Descompacte o ZIP.
+2. Envie a pasta do projeto para um repositório Git (GitHub) ou importe-a na Vercel conforme o fluxo de importação de projeto.
+3. Nas configurações do projeto na Vercel, abra Settings > Environment Variables.
+4. Crie:
+   Name: FREEIMAGE_API_KEY
+   Value: SUA_CHAVE_REAL_DO_FREEIMAGE_HOST
+   Selecione Production (e Preview se desejar).
+5. Salve e faça um novo Deploy.
+6. Abra o domínio do projeto e teste enviando uma imagem pequena.
+
+COMO TESTAR LOCALMENTE
+----------------------
+É um projeto para Vercel Functions; não abra o index.html como arquivo local esperando que o upload funcione.
+Com Node.js instalado:
+  npm install -g vercel
+  vercel dev
+Configure FREEIMAGE_API_KEY no ambiente local ou em um arquivo .env.local (não envie esse arquivo ao GitHub):
+  FREEIMAGE_API_KEY=sua_chave_real
+
+SOBRE OS LINKS
+--------------
+O link retornado é o link direto gerado pelo Freeimage.host (normalmente no domínio iili.io ou freeimage.host).
+Este projeto ainda NÃO cria URLs personalizadas do tipo dcell.vercel.app/foto/123.jpg. Para isso seria necessário guardar um mapeamento persistente de cada código para a URL real em um banco de dados/armazenamento. Não é correto inventar esse link sem esse mapeamento.
+
+LIMITES
+-------
+O Freeimage.host informa limite de 64 MB por imagem, mas este projeto usa uma função da Vercel, que limita o corpo da requisição. Para manter o upload funcionando por este caminho, o projeto limita cada arquivo a 4 MB. O serviço pode alterar regras ou disponibilidade. Consulte:
+https://freeimage.host/pt-br
+https://freeimage.host/pt-br/api
+
+Para permitir arquivos maiores, será necessário mudar a arquitetura do upload para um serviço que aceite requisições maiores; não basta alterar o número no HTML.
+
+SEGURANÇA
+---------
+- A chave da API fica somente na função do servidor.
+- Não coloque a chave no script.js, no HTML ou em repositório público.
+- Não envie fotos privadas, documentos ou imagens sensíveis a um serviço público de hospedagem.

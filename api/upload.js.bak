@@ -1,0 +1,86 @@
+// Vercel Serverless Function: a chave da API fica no servidor, nunca no JavaScript público.
+export const config = { api: { bodyParser: false } };
+
+const MAX_SIZE = 4 * 1024 * 1024;
+
+function readRequest(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > MAX_SIZE + 1024 * 1024) {
+        reject(new Error('Arquivo muito grande. O limite deste projeto na Vercel é 4 MB.'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
+function parseMultipart(buffer, contentType) {
+  const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
+  if (!match) throw new Error('Requisição de upload inválida.');
+  const boundary = Buffer.from(`--${match[1] || match[2]}`);
+  let start = buffer.indexOf(boundary);
+  while (start !== -1) {
+    start += boundary.length;
+    if (buffer[start] === 13 && buffer[start + 1] === 10) start += 2;
+    const next = buffer.indexOf(boundary, start);
+    if (next === -1) break;
+    let part = buffer.subarray(start, next);
+    if (part.length >= 2 && part[part.length - 2] === 13 && part[part.length - 1] === 10) part = part.subarray(0, part.length - 2);
+    const sep = part.indexOf(Buffer.from('\r\n\r\n'));
+    if (sep !== -1) {
+      const headers = part.subarray(0, sep).toString('utf8');
+      const body = part.subarray(sep + 4);
+      if (/name="image"/i.test(headers)) {
+        const type = (headers.match(/content-type:\s*([^\r\n]+)/i) || [])[1]?.trim() || 'application/octet-stream';
+        const filename = (headers.match(/filename="([^"]*)"/i) || [])[1] || 'image';
+        return { body, type, filename };
+      }
+    }
+    start = next;
+  }
+  throw new Error('Nenhuma imagem foi recebida.');
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Use POST para enviar uma imagem.' });
+  }
+  const key = process.env.FREEIMAGE_API_KEY;
+  if (!key) return res.status(500).json({ error: 'Falta configurar FREEIMAGE_API_KEY nas variáveis de ambiente da Vercel.' });
+  try {
+    const raw = await readRequest(req);
+    const contentType = req.headers['content-type'] || '';
+    const file = parseMultipart(raw, contentType);
+    const allowed = new Set(['image/jpeg','image/png','image/webp','image/gif','image/bmp']);
+    if (!allowed.has(file.type)) return res.status(400).json({ error: 'Formato não permitido. Use JPG, PNG, WEBP, GIF ou BMP.' });
+    if (!file.body.length || file.body.length > MAX_SIZE) return res.status(400).json({ error: 'A imagem está vazia ou ultrapassa 4 MB neste projeto.' });
+
+    const upload = new FormData();
+    upload.append('key', key);
+    upload.append('action', 'upload');
+    upload.append('format', 'json');
+    upload.append('source', new Blob([file.body], { type: file.type }), file.filename);
+
+    const upstream = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: upload });
+    const data = await upstream.json().catch(() => null);
+    if (!upstream.ok || !data || data.status_code !== 200 || !data.image) {
+      return res.status(502).json({ error: data?.error?.message || data?.status_txt || 'O Freeimage.host recusou o envio. Confira a chave da API e tente novamente.' });
+    }
+    return res.status(200).json({
+      url: data.image.url.replace(/^http:/, 'https:'),
+      viewer: data.image.url_viewer?.replace(/^http:/, 'https:') || null,
+      filename: data.image.filename || file.filename
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message || 'Erro ao processar o envio.' });
+  }
+}

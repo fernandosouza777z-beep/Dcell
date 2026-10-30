@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07152d">
+  <meta name="description" content="DCELL — hospedagem simples e rápida de imagens.">
+  <title>DCELL — Hospedagem de imagens</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="bg-glow glow-a"></div><div class="bg-glow glow-b"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="DCELL início"><span class="brand-mark">D</span><span>DCELL<span class="brand-dot">.</span></span></a>
+    <span class="top-pill"><i></i> HOSPEDAGEM DE IMAGENS</span>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow"><span class="spark">✦</span> SUAS IMAGENS, SEUS LINKS</div>
+      <h1>Envie. Copie.<br><span>Compartilhe.</span></h1>
+      <p class="hero-copy">Hospede suas imagens em poucos segundos e receba um link direto para compartilhar onde quiser.</p>
+    </section>
+
+    <section class="upload-card" aria-label="Enviar imagem">
+      <div class="card-head">
+        <div><div class="step-label">UPLOAD RÁPIDO</div><h2>Enviar uma imagem</h2></div>
+        <div class="upload-icon" aria-hidden="true">↑</div>
+      </div>
+      <label class="drop-zone" id="dropZone" for="fileInput">
+        <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp">
+        <span class="cloud-icon" aria-hidden="true">⇧</span>
+        <strong>Toque para escolher uma foto</strong>
+        <span class="drop-sub">ou arraste e solte o arquivo aqui</span>
+        <span class="formats">JPG · PNG · WEBP · GIF · BMP <b>até 4 MB</b></span>
+      </label>
+
+      <div class="preview-wrap" id="previewWrap" hidden>
+        <img id="preview" alt="Prévia da imagem selecionada">
+        <div class="preview-meta"><strong id="fileName">imagem.jpg</strong><span id="fileSize"></span></div>
+        <button class="remove-btn" id="removeBtn" type="button" aria-label="Remover imagem">×</button>
+      </div>
+
+      <button class="primary-btn" id="uploadBtn" type="button" disabled><span>↑</span> Enviar imagem</button>
+      <div class="progress-area" id="progressArea" hidden><div class="progress-track"><span id="progressBar"></span></div><span id="statusText">Preparando envio…</span></div>
+      <div class="error-box" id="errorBox" role="alert" hidden></div>
+
+      <section class="result" id="result" hidden>
+        <div class="success-title"><span>✓</span><div><strong>Imagem enviada!</strong><small>Seu link está pronto para compartilhar.</small></div></div>
+        <div class="link-row"><input id="resultUrl" type="text" readonly aria-label="Link da imagem"><button id="copyBtn" type="button">Copiar link</button></div>
+        <a id="openLink" class="open-link" href="#" target="_blank" rel="noopener">Abrir imagem ↗</a>
+        <button class="secondary-btn" id="anotherBtn" type="button">＋ Enviar mais uma</button>
+      </section>
+
+      <p class="privacy-note"><span>♢</span> As imagens são enviadas ao Freeimage.host. Evite enviar fotos privadas ou documentos pessoais.</p>
+    </section>
+
+    <section class="feature-row">
+      <article><span class="feature-icon">↗</span><div><strong>Link direto</strong><p>Copie e compartilhe com facilidade.</p></div></article>
+      <article><span class="feature-icon">⚡</span><div><strong>Rápido e simples</strong><p>Sem precisar instalar aplicativo.</p></div></article>
+      <article><span class="feature-icon">▣</span><div><strong>Vários formatos</strong><p>JPG, PNG, GIF, WEBP e BMP.</p></div></article>
+    </section>
+    <footer>© <span id="year"></span> DCELL <span class="footer-sep">•</span> Feito para compartilhar imagens.</footer>
+  </main>
+  <script src="/script.js" defer></script>
+</body>
+</html>
